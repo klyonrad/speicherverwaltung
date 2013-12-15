@@ -54,8 +54,8 @@ void *mymalloc(unsigned int size /*requested size in bytes*/, int line) {
 				it->size = size;
 				it->isAllocated = true;
 				it->programline = line;
-				unsigned int memAdressToReturn = it->memAdress;
-				memSegments.insert(++it, newFreeMemSeg); // cannot use it after this. inserts before the element at the position
+				unsigned int memAdressToReturn = it->memAdress; // the allocated segment
+				memSegments.insert(++it, newFreeMemSeg); // cannot use it after this. inserts before the element at the position // TODO: make the new memSeg allocated.
 				return (void*) memAdressToReturn;
 			}
 		}
@@ -64,8 +64,28 @@ void *mymalloc(unsigned int size /*requested size in bytes*/, int line) {
 	return 0;
 }
 
-void myfree(void *p) {
+void myfree(void *addressToDelete) {
+	for(std::list<memorySegment>::iterator it = memSegments.begin(); it != memSegments.end(); ++it){
+		if (it->memAdress == (unsigned int)addressToDelete) {
+			if (it == memSegments.begin()) { // has only one neighbor
+				it->isAllocated = false;
+				if (std::next(it, 1)->isAllocated == false) {
+					//merge two free blocks together
+					it->size += std::next(it, 1)->size;					
+					memSegments.erase(std::next(it, 1));
+					return;
+				}				
+			}
+			else
+			{
+				it->isAllocated = false;
+				if (std::prev(it, 1)->isAllocated == false) {
 
+				}
+			}
+
+		}
+	}
 }
 
 void mystatus(void){
