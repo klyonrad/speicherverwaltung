@@ -151,17 +151,17 @@ int main(int argc, char* argv[])
 	void *p1 = mymalloc(512, __LINE__);
 	void *p2 = mymalloc(1024, __LINE__);
 	void *p3 = mymalloc(1024, __LINE__);
-
 	mystatus();
 
 	cout << "freeing memory...." << endl << endl;
 	myfree(p1);
 	myfree(p3);
+	mystatus();
 
+	p1 = mymalloc(256, __LINE__);
 	mystatus();
 
 	cout << "did it work?" << endl;
-
 	return 0;
 }
 
