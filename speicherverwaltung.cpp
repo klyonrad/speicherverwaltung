@@ -57,11 +57,9 @@ void *mymalloc(unsigned int size /*requested size in bytes*/, int line) {
 					memorySegment newFreeMemSeg = {it->memAdress + (size*8), it->size-size, false, 0};
 					it->size = size;
 					it->isAllocated = true;
-					it->programline = line;
-					unsigned int memAdressToReturn = it->memAdress; // the allocated segment
-					memSegments.insert(++it, newFreeMemSeg); // cannot use it after this. inserts before the element at the position // TODO: use std::next
-					totalAlloc += size;
-					return (void*) memAdressToReturn;
+					it->programline = line;					
+					memSegments.insert(std::next(it, 1), newFreeMemSeg);
+					return (void*) it->memAdress;
 				}
 				else if (memStrategy == BEST_FIT) {
 					if (setCurrentBestFit == false) {
