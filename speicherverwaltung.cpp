@@ -1,10 +1,7 @@
-// speicherverwaltung.cpp : Defines the entry point for the console application.
-
 #include <stdlib.h>
 #include <malloc.h>
 #include <iostream>
 #include <list>
-#include <algorithm>
 
 using std::cout;
 using std::cin;
@@ -22,11 +19,14 @@ struct memorySegment {
 
 bool memInitialized = false;
 unsigned int memBlockBeginning;
+unsigned int totalMemory;
+unsigned int totalAlloc;
 std::list<memorySegment> memSegments;
 int memStrategy; // 0 = first-fit, 1 = best-fit
 
 void myinit(unsigned int totalmem, int strategy){
 	memBlockBeginning = (unsigned int)malloc(totalmem);
+	totalMemory = totalmem;
 	memInitialized = true;
 	memStrategy = strategy;
 
@@ -49,13 +49,13 @@ void *mymalloc(unsigned int size /*requested size in bytes*/, int line) {
 		if (it->isAllocated == false) {
 			if (size <= it->size) { // first fit
 				cout<<"found a fitting hole." << endl;
-
 				memorySegment newFreeMemSeg = {it->memAdress + (size*8), it->size-size, false, 0};
 				it->size = size;
 				it->isAllocated = true;
 				it->programline = line;
 				unsigned int memAdressToReturn = it->memAdress; // the allocated segment
-				memSegments.insert(++it, newFreeMemSeg); // cannot use it after this. inserts before the element at the position // TODO: make the new memSeg allocated.
+				memSegments.insert(++it, newFreeMemSeg); // cannot use it after this. inserts before the element at the position // TODO: use std::next
+				totalAlloc += size;
 				return (void*) memAdressToReturn;
 			}
 		}
@@ -107,7 +107,19 @@ void myfree(void *addressToDelete) {
 }
 
 void mystatus(void){
-
+	cout<< "start: " <<std::hex<< memBlockBeginning<< " End: " <<std::hex<<memBlockBeginning+(totalMemory*8)<< endl;
+	cout<< "totalmem: " << std::hex<< totalMemory << " (" << totalMemory << ")" << endl;
+	cout<< "Total allocated: " << std::hex<<totalAlloc<< " (" << totalAlloc << ")" << endl;
+	// iterate through allocations:
+	int i = 0; // for numbering the allocations
+	for(std::list<memorySegment>::iterator it = memSegments.begin(); it != memSegments.end(); ++it){
+		if (it->isAllocated == true) {
+			cout << "Allocation " << i << ":" << endl;
+			cout << "start: " <<std::hex<<it->memAdress << "end: " <<std::hex<< it->memAdress+(it->size*8) << endl;
+			cout << "mymalloc(" <<it->size << "); in line " <<it->programline << endl;
+			++i;
+		}		
+	}
 }
 
 int main(int argc, char* argv[])
