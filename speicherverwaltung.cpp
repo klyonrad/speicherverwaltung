@@ -40,7 +40,7 @@ void myinit(unsigned int totalmem, int strategy){
 }
 
 void mycleanup(void){
-
+	free ((void*)memBlockBeginning);
 }
 
 void *mymalloc(unsigned int size /*requested size in bytes*/, int line) {
