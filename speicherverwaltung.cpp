@@ -76,13 +76,19 @@ void myfree(void *addressToDelete) {
 					return;
 				}				
 			}
+			else if(it == memSegments.end()) {
+				it->isAllocated = false;
+				if (std::prev(it, 1)->isAllocated == false) {
+					std::prev(it, 1)->size += it->size; // the previous shall become the head of the freeMemSeg
+					memSegments.erase(it);
+					return;
+				}
+			}
 			else
 			{
 				it->isAllocated = false;
-				if (std::prev(it, 1)->isAllocated == false) { // case f1 a2 f3
-					--it; // the previous shall become the head of the freeMemSeg
-					it->size += std::next(it, 1)->size;
-					++it;
+				if (std::prev(it, 1)->isAllocated == false) { // case f1 a2 f3					
+					std::prev(it, 1)->size += it->size; // the previous shall become the head of the freeMemSeg					
 					if (std::next(it, 1)->isAllocated == false) {
 						std::prev(it, 1)->size += std::next(it, 1)->size;
 						memSegments.erase(std::next(it, 1) );
@@ -96,7 +102,6 @@ void myfree(void *addressToDelete) {
 					return;
 				}
 			}
-
 		}
 	}
 }
