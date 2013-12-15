@@ -79,8 +79,21 @@ void myfree(void *addressToDelete) {
 			else
 			{
 				it->isAllocated = false;
-				if (std::prev(it, 1)->isAllocated == false) {
-
+				if (std::prev(it, 1)->isAllocated == false) { // case f1 a2 f3
+					--it; // the previous shall become the head of the freeMemSeg
+					it->size += std::next(it, 1)->size;
+					++it;
+					if (std::next(it, 1)->isAllocated == false) {
+						std::prev(it, 1)->size += std::next(it, 1)->size;
+						memSegments.erase(std::next(it, 1) );
+					}
+					memSegments.erase(it);
+					return;
+				}
+				else if (std::next(it, 1)->isAllocated == false) { // case a1 a2 f3 and we want to free a2
+					it->size += std::next(it, 1)->size;
+					memSegments.erase(std::next(it, 1) );
+					return;
 				}
 			}
 
