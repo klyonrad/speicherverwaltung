@@ -45,21 +45,43 @@ void mycleanup(void){
 
 void *mymalloc(unsigned int size /*requested size in bytes*/, int line) {
 
+	std::list<memorySegment>::iterator currentBestFit;
+	bool setCurrentBestFit = false;	
 	for(std::list<memorySegment>::iterator it = memSegments.begin(); it != memSegments.end(); ++it){
 		if (it->isAllocated == false) {
 			if (size <= it->size) { // first fit
 				cout<<"found a fitting hole." << endl;
-				memorySegment newFreeMemSeg = {it->memAdress + (size*8), it->size-size, false, 0};
-				it->size = size;
-				it->isAllocated = true;
-				it->programline = line;
-				unsigned int memAdressToReturn = it->memAdress; // the allocated segment
-				memSegments.insert(++it, newFreeMemSeg); // cannot use it after this. inserts before the element at the position // TODO: use std::next
-				totalAlloc += size;
-				return (void*) memAdressToReturn;
+				if (it->size == size) // nothing more to do if it perfectly fits.
+					return (void*)it->memAdress;  // works for first-fit and best-fit
+				if (memStrategy == FIRST_FIT) {
+					memorySegment newFreeMemSeg = {it->memAdress + (size*8), it->size-size, false, 0};
+					it->size = size;
+					it->isAllocated = true;
+					it->programline = line;
+					unsigned int memAdressToReturn = it->memAdress; // the allocated segment
+					memSegments.insert(++it, newFreeMemSeg); // cannot use it after this. inserts before the element at the position // TODO: use std::next
+					totalAlloc += size;
+					return (void*) memAdressToReturn;
+				}
+				else if (memStrategy == BEST_FIT) {
+					if (setCurrentBestFit == false) {
+						currentBestFit = it;
+						setCurrentBestFit = true;
+					}
+					else if (it->size < currentBestFit->size)
+						currentBestFit = it;
+				}
 			}
 		}
-
+	}
+	if (setCurrentBestFit == true) {
+		memorySegment newFreeMemSeg = {currentBestFit->memAdress + (size*8), currentBestFit->size-size, false, 0};
+		currentBestFit->size = size;
+		currentBestFit->isAllocated = true;
+		currentBestFit->programline = line;
+		memSegments.insert(std::next(currentBestFit, 1), newFreeMemSeg);
+		totalAlloc += size;
+		return (void*) currentBestFit->memAdress;
 	}
 	return 0;
 }
@@ -126,7 +148,7 @@ void mystatus(void){
 
 int main(int argc, char* argv[])
 {
-	myinit(4096, FIRST_FIT);
+	myinit(4096, BEST_FIT);
 
 	void *p1 = mymalloc(512, __LINE__);
 	void *p2 = mymalloc(1024, __LINE__);
