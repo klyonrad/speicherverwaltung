@@ -2,6 +2,7 @@
 #include <malloc.h>
 #include <iostream>
 #include <list>
+#include <stdint.h>
 
 using std::cout;
 using std::cin;
@@ -11,21 +12,21 @@ using std::endl;
 #define BEST_FIT 1
 
 struct memorySegment {
-	unsigned int memAdress;
+	uint32_t memAdress;
 	unsigned int size; // size in bytes
 	bool isAllocated; // Hole or Process
 	int programline;
 };
 
 bool memInitialized = false;
-unsigned int memBlockBeginning;
+uint32_t memBlockBeginning;
 unsigned int totalMemory;
 unsigned int totalAlloc;
 std::list<memorySegment> memSegments;
 int memStrategy; // 0 = first-fit, 1 = best-fit
 
 void myinit(unsigned int totalmem, int strategy){
-	memBlockBeginning = (unsigned int)malloc(totalmem);
+	memBlockBeginning = (uint32_t)malloc(totalmem);
 	totalMemory = totalmem;
 	memInitialized = true;
 	memStrategy = strategy;
