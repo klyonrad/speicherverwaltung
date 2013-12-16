@@ -31,10 +31,6 @@ void myinit(unsigned int totalmem, int strategy){
 	memStrategy = strategy;
 
 	memorySegment newMemorySegment = {memBlockBeginning, totalmem, false, 0};
-	/*newMemorySegment.memAdress = memBlockBeginning;
-	newMemorySegment.size = totalmem;
-	newMemorySegment.isAllocated = false;
-	newMemorySegment.programline = 0; */
 
 	memSegments.push_front(newMemorySegment);
 }
